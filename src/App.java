@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -10,7 +9,6 @@ public class App {
         int menuSelect;
         int pageNumInput = -1;
         long refInput = -1;
-        int numFaults = 0;
 
         while (true) {
             System.out.println(
@@ -42,28 +40,29 @@ public class App {
                     }
                     break;
                 case 2:
-                System.out.println("Option 2 selected.\n");
-                boolean validRef = false;
-                while (!validRef) {
-                    System.out.println("Please enter reference number.");
-                    if (s.hasNextLong()) { // check if ref is a long
-                        refInput = s.nextLong();
-                        s.nextLine(); // consume the new line character
-                        int refLength = String.valueOf(refInput).length();
-                        if (refLength <= 20 && refLength >= 3 && refInput > 0) {
-                            System.out.println("\nValid Input received.");
-                            System.out.println(refInput);
-                            validRef = true;
+                    System.out.println("Option 2 selected.\n");
+                    boolean validRef = false;
+                    while (!validRef) {
+                        System.out.println("Please enter reference number.");
+                        if (s.hasNextLong()) { // check if ref is a long
+                            refInput = s.nextLong();
+                            s.nextLine(); // consume the new line character
+                            int refLength = String.valueOf(refInput).length();
+                            if (refLength <= 20 && refLength >= 3 && refInput > 0) {
+                                System.out.println("\nValid Input received.");
+                                System.out.println(refInput);
+                                validRef = true;
+                            } else {
+                                System.out
+                                        .println("Invalid long - must be a positive long with digit count from 3-20.");
+                            }
                         } else {
-                            System.out.println("Invalid long - must be a positive long with digit count from 3-20.");
+                            s.nextLine(); // consume the invalid input
+                            System.out.println("Invalid input - please enter a valid long.");
                         }
-                    } else {
-                        s.nextLine(); // consume the invalid input
-                        System.out.println("Invalid input - please enter a valid long.");
                     }
-                }
-                break;
-                
+                    break;
+
                 case 3:
                     System.out.println("Option 3 selected.\n");
                     runOPT(pageNumInput, refInput);
@@ -118,76 +117,76 @@ public class App {
 
         for (int i = 0; i < refInputAL.size(); i++) {
             if (!memory.contains(refInputAL.get(i))) {
-              if (memory.size() < pageNumInput) {
-                memory.add(currentFrame, refInputAL.get(i));
-                refListAL.remove((Integer) refInputAL.get(i));  
-                ++currentFrame;
-                fault = true;
-                if (i>=pageNumInput) {
-                    faultCount++;
+                if (memory.size() < pageNumInput) {
+                    memory.add(currentFrame, refInputAL.get(i));
+                    refListAL.remove((Integer) refInputAL.get(i));
+                    ++currentFrame;
+                    fault = true;
+                    if (i >= pageNumInput) {
+                        faultCount++;
+                    }
+
+                } else { // Page fault on full memory, swap
+                    fault = true;
+                    if (i >= pageNumInput) {
+                        faultCount++;
+                    }
+                    // Step 1 remove current item.
+                    int temp = refListAL.get(0);
+                    refListAL.remove(0);
+
+                    // Step 2 find ref that will not be used for longest period
+                    for (int m : memory) {
+                        index = refListAL.indexOf(m);
+
+                        // Simplest case, ref is never seen again
+                        if (index == -1) {
+                            victim = m;
+                            break;
+                        }
+
+                        if (index > max) { // Find max index into reference string
+                            victim = m; // that will be the victim unless an index
+                            max = index; // of -1 comes by.
+                        }
+                    }
+
+                    memory.set(memory.indexOf(victim), temp); // Swap
+                    max = -1; // Reset max
                 }
-                    
-              } else { // Page fault on full memory, swap
-                fault = true;
-                if (i>=pageNumInput) {
-                    faultCount++;
-                }
-                // Step 1 remove current item.
-                int temp = refListAL.get(0);
-                refListAL.remove(0);
-      
-                // Step 2 find ref that will not be used for longest period
-                for (int m : memory) {
-                  index = refListAL.indexOf(m);
-      
-                  // Simplest case, ref is never seen again
-                  if (index == -1) {
-                    victim = m;
-                    break;
-                  }
-      
-                  if (index > max) { // Find max index into reference string
-                    victim = m;      // that will be the victim unless an index
-                    max = index;     // of -1 comes by.
-                  }
-                }
-      
-                memory.set(memory.indexOf(victim), temp); // Swap
-                max = -1;  // Reset max
-              }
             } else { // Memory contains reference
-              fault = false;
-              refListAL.remove(0);
+                fault = false;
+                refListAL.remove(0);
             }
-      
+
             for (int j = 0; j < memory.size(); ++j) {
-              outPutTable[j + 1][i + 1] = String.valueOf(memory.get(j));
+                outPutTable[j + 1][i + 1] = String.valueOf(memory.get(j));
             }
-      
+
             if (fault && i >= pageNumInput) {
-              outPutTable[pageNumInput + 1][i + 1] = "F";
-              if (victim != -1)
-                outPutTable[pageNumInput + 2][i + 1] = String.valueOf(victim);
+                outPutTable[pageNumInput + 1][i + 1] = "F";
+                if (victim != -1)
+                    outPutTable[pageNumInput + 2][i + 1] = String.valueOf(victim);
             }
-          
-      
+
             System.out.println("Current Table\n");
             printTable(outPutTable);
-      
+
             System.out.print("\nPress Enter to continue... ");
             promptEnterKey();
-          }
+        }
 
         System.out.println("\nOPT  is now complete");
         System.out.println("A total of " + faultCount + " faults occurred");
-        
+
     }
 
-    public static void promptEnterKey(){
+    public static void promptEnterKey() {
         System.out.println("Press \"ENTER\" to continue...");
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
-     }
+        scanner.close();
+    }
 
     private static void printTable(String[][] outPutTable) {
         String separator = "-";
@@ -243,4 +242,4 @@ public class App {
 
 }
 
-//2456751452365345356
+// 2456751452365345356
