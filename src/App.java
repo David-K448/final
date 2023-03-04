@@ -12,6 +12,8 @@ public class App {
         int menuSelect;
         int pageNumInput = -1;
         long refInput = -1;
+        boolean refValid = false;
+        boolean numValid = false;
 
         while (true) {
             System.out.println(
@@ -36,6 +38,7 @@ public class App {
                         if (pageNumInput >= 2 && pageNumInput <= 8) {
                             System.out.println("\nValid Input recieved.");
                             validPage = true;
+                            numValid = true;
                         } else {
                             System.out.println("Invalid Input recieved, min length = 2, max length = 8");
                             pageNumInput = -1;
@@ -55,6 +58,7 @@ public class App {
                                 System.out.println("\nValid Input received.");
                                 System.out.println(refInput);
                                 validRef = true;
+                                refValid = true;
                             } else {
                                 System.out
                                         .println("Invalid long - must be a positive long with digit count from 3-20.");
@@ -68,11 +72,29 @@ public class App {
 
                 case 3:
                     System.out.println("Option 3 selected.\n");
-                    runOPT(pageNumInput, refInput);
+                    if(numValid){
+                        if(refValid){
+                            runOPT(pageNumInput, refInput);
+                        } else {
+                            System.out.println("Invalid Ref, unable to run OPT.");
+                        }
+                    } else {
+                        System.out.println("Invalid page count, unable to run OPT.");
+                    }
+                    
                     break;
                 case 4:
                     System.out.println("Option 4 selected.\n");
-                    runNew(pageNumInput, refInput);
+                    if(numValid){
+                        if(refValid){
+                            runNew(pageNumInput, refInput);
+                        } else {
+                            System.out.println("Invalid Ref, unable to run NEW.");
+                        }
+                    } else {
+                        System.out.println("Invalid page count, unable to run NEW.");
+                    }
+                    
                     break;
                 default:
                     System.out.println("Invalid input");
